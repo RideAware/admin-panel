@@ -23,7 +23,7 @@
     {% endif %}
   {% endwith %}
 
-  <form action="{{ url_for('send_update') }}" method="POST">
+  <form action="{{ url_for('send_update_email') }}" method="POST">
     <label for="subject">Subject:</label>
     <input type="text" name="subject" required>
 
