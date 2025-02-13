@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Center - Send Update</title>
   <style>
@@ -10,7 +10,12 @@
     label { display: block; margin-top: 15px; }
     input[type="text"], textarea { width: 100%; padding: 8px; }
     button { margin-top: 15px; padding: 10px 20px; }
-    .flash { background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 10px; }
+    .flash {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -23,7 +28,7 @@
     {% endif %}
   {% endwith %}
 
-  <form action="{{ url_for('send_update_email') }}" method="POST">
+  <form action="{{ url_for('send_update') }}" method="POST">
     <label for="subject">Subject:</label>
     <input type="text" name="subject" required>
 
@@ -32,6 +37,9 @@
 
     <button type="submit">Send Update</button>
   </form>
-  <p><a href="{{ url_for('index') }}">Back to Subscribers List</a></p>
+  <p>
+    <a href="{{ url_for('index') }}">Back to Subscribers List</a> |
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </p>
 </body>
 </html>
