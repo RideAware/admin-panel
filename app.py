@@ -10,6 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 # Use a secret key from .env; ensure your .env sets SECRET_KEY
 app.secret_key = os.getenv('SECRET_KEY')
+base_url = os.getenv('BASE_URL')
 
 # SMTP settings (for sending update emails)
 SMTP_SERVER = os.getenv('SMTP_SERVER')
@@ -40,7 +41,12 @@ def process_send_update_email(subject, body):
         server.set_debuglevel(True)
         server.login(SMTP_USER, SMTP_PASSWORD)
         for email in subscribers:
-            msg = MIMEText(body, 'html', 'utf-8')
+            unsub_link = f"https://{base_url}/unsubscribe?email={email}"
+            custom_body = (
+                f"{body}<br><br>"
+                f"If you ever wish to unsubscribe, please click <a href='{unsub_link}'>here</a>"
+            )
+            msg = MIMEText(custom_body, 'html', 'utf-8')
             msg['Subject'] = subject
             msg['From'] = SMTP_USER
             msg['To'] = email
