@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
-from database import init_db, get_all_emails, get_admin, create_default_admin
+from database import get_connection, init_db, get_all_emails, get_admin, create_default_admin
 
 load_dotenv()
 app = Flask(__name__)
@@ -53,6 +53,17 @@ def process_send_update_email(subject, body):
             server.sendmail(SMTP_USER, email, msg.as_string())
             print(f"Update email sent to: {email}")
         server.quit()
+        
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+                "INSERT INTO newsletters (subject, body) VALUES (%s, %s)",
+                (subject, body)
+            )
+        conn.commit()
+        cursor.close()
+        conn.close()
+
         return "Email has been sent."
     except Exception as e:
         print(f"Failed to send email: {e}")
