@@ -1,31 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Center - Send Update</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    form { max-width: 600px; }
-    label { display: block; margin-top: 15px; }
-    input[type="text"], textarea { width: 100%; padding: 8px; }
-    button { margin-top: 15px; padding: 10px 20px; }
-    .flash {
-      background-color: #f8d7da;
-      color: #721c24;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
   <h1>Send Update Email</h1>
   {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for message in messages %}
-        <div class="flash">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
+  {% if messages %}
+  {% for message in messages %}
+  <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
   {% endwith %}
 
   <form action="{{ url_for('send_update') }}" method="POST">
@@ -42,4 +32,5 @@
     <a href="{{ url_for('logout') }}">Logout</a>
   </p>
 </body>
+
 </html>
