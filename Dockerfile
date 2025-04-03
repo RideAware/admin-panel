@@ -16,4 +16,3 @@ ENV FLASK_APP=server.py
 EXPOSE 5001
 
 CMD ["gunicorn", "--bind", "0.0.0.0:5001", "app:app"]
-
