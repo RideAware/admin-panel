@@ -110,7 +110,6 @@ def index():
     emails = get_all_emails()
     return render_template("admin_index.html", emails=emails)
 
-
 @app.route("/send_update", methods=["GET", "POST"])
 @login_required
 def send_update():
