@@ -11,6 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// main is the program entry point for the admin panel. It loads configuration,
+// initializes middleware and the database (closed on exit), configures a Gin
+// router with HTML templates and static assets, registers public and
+// authenticated routes, and starts the HTTP server on the configured port.
 func main() {
 	cfg := config.Load()
 	middleware.Init()

@@ -11,6 +11,13 @@ import (
 	"github.com/wneessen/go-mail"
 )
 
+// SendUpdate sends a newsletter with the given subject and body to all subscriber emails stored in the database.
+// It returns a human-readable status message and, when subscriber retrieval fails, the underlying error.
+// - If retrieving subscribers fails: returns "Failed to retrieve subscribers" and the error.
+// - If no subscribers are found: returns "No subscribers found." and nil.
+// - If sending to a specific subscriber fails: returns "Failed to send to <email>" and nil.
+// - On success: returns "Email has been sent to all subscribers." and nil.
+// Note: logging the newsletter entry in the database is attempted after sending and any logging failure is non-fatal.
 func SendUpdate(subject, body string) (string, error) {
 	subscribers, err := database.GetAllEmails()
 	if err != nil {
@@ -34,6 +41,8 @@ func SendUpdate(subject, body string) (string, error) {
 	return "Email has been sent to all subscribers.", nil
 }
 
+// send constructs and sends an HTML newsletter update to the specified recipient using the current SMTP configuration.
+// It embeds an unsubscribe link for the recipient and returns true if the message was sent successfully, false if client creation, message setup, or sending fails.
 func send(subject, body, recipient string) bool {
 	cfg := config.Current
 
