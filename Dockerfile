@@ -1,18 +1,29 @@
-FROM python:3.11-slim-buster
+# Stage 1: Build
+FROM docker.io/library/golang:1.23-alpine AS builder
 
-# Install build dependencies (build-essential provides gcc and other tools)
-RUN apt-get update && apt-get install -y build-essential
+WORKDIR /build
 
-WORKDIR /rideaware_landing
+RUN apk add --no-cache gcc musl-dev
 
-COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
+COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . .
 
-ENV FLASK_APP=server.py
+RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo \
+    -o admin-panel ./cmd/admin-panel
+
+# Stage 2: Runtime
+FROM docker.io/library/alpine:latest
+
+RUN apk add --no-cache ca-certificates
+
+WORKDIR /app
+
+COPY --from=builder /build/admin-panel .
+COPY .env .env
+COPY web ./web
 
 EXPOSE 5001
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "app:app"]
+CMD ["./admin-panel"]
