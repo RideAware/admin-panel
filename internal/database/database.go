@@ -19,6 +19,13 @@ type Admin struct {
 	Password string
 }
 
+// Init initializes the package database connection using values from cfg, sets connection pool limits,
+// creates required tables, and ensures a default admin user exists.
+// It assigns the opened *sql.DB to the package-level db and will terminate the program if establishing
+// or verifying the connection fails.
+//
+// cfg provides PostgreSQL connection parameters and the default admin credentials used to create the
+// default admin user when missing.
 func Init(cfg *config.Config) {
 	password := url.QueryEscape(cfg.PGPassword)
 
@@ -47,12 +54,17 @@ func Init(cfg *config.Config) {
 	createDefaultAdmin(cfg)
 }
 
+// Close closes the package-level database connection if it has been initialized.
+// It is safe to call multiple times; if no connection exists, the call is a no-op.
 func Close() {
 	if db != nil {
 		db.Close()
 	}
 }
 
+// createTables creates the required database tables if they do not already exist.
+// It ensures the subscribers, admin_users, and newsletters tables are present; errors
+// encountered while creating individual tables are logged but do not abort the process.
 func createTables() {
 	queries := []string{
 		`CREATE TABLE IF NOT EXISTS subscribers (
@@ -81,6 +93,8 @@ func createTables() {
 	log.Println("Database tables ready.")
 }
 
+// GetAllEmails retrieves all subscriber email addresses from the database.
+// It returns a slice of email strings and any error encountered while querying or scanning rows.
 func GetAllEmails() ([]string, error) {
 	rows, err := db.Query("SELECT email FROM subscribers")
 	if err != nil {
@@ -101,6 +115,8 @@ func GetAllEmails() ([]string, error) {
 	return emails, rows.Err()
 }
 
+// GetAdmin retrieves the admin user with the given username.
+// It returns a pointer to the Admin when a matching row exists. If no admin is found, it returns an error "admin not found"; other database errors are returned unchanged.
 func GetAdmin(username string) (*Admin, error) {
 	var admin Admin
 	err := db.QueryRow(
@@ -118,6 +134,10 @@ func GetAdmin(username string) (*Admin, error) {
 	return &admin, nil
 }
 
+// createDefaultAdmin ensures a default admin user exists by inserting cfg.AdminUsername
+// with a bcrypt-hashed cfg.AdminPassword into the admin_users table; the insert is
+// idempotent (no-op if the username already exists). If password hashing fails the
+// function terminates the process; insertion errors are logged.
 func createDefaultAdmin(cfg *config.Config) {
 	hashedPassword, err := hashPassword(cfg.AdminPassword)
 	if err != nil {
@@ -136,6 +156,8 @@ func createDefaultAdmin(cfg *config.Config) {
 	}
 }
 
+// LogNewsletter inserts a newsletter record with the provided subject and body into the newsletters table.
+// It returns any error encountered while inserting the record.
 func LogNewsletter(subject, body string) error {
 	_, err := db.Exec(
 		"INSERT INTO newsletters (subject, body) VALUES ($1, $2)",
@@ -144,6 +166,8 @@ func LogNewsletter(subject, body string) error {
 	return err
 }
 
+// hashPassword generates a bcrypt hash for the given plaintext password.
+// It uses bcrypt.DefaultCost and returns the hashed password as a string and any error encountered.
 func hashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword(
 		[]byte(password),
@@ -152,6 +176,8 @@ func hashPassword(password string) (string, error) {
 	return string(hash), err
 }
 
+// VerifyPassword reports whether the provided plaintext password matches the given bcrypt hash.
+// It returns true if the password matches, false otherwise.
 func VerifyPassword(hash, password string) bool {
 	return bcrypt.CompareHashAndPassword(
 		[]byte(hash),

@@ -28,6 +28,9 @@ type Config struct {
 
 var Current *Config
 
+// Load loads configuration from environment variables or a .env file and initializes the package-level Current configuration.
+// It constructs a Config with sensible defaults for server, PostgreSQL, SMTP, admin credentials, secret key, and base URL.
+// If SENDER_EMAIL is not set, it falls back to SMTP_USER. The created Config is assigned to Current and returned.
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
@@ -59,6 +62,8 @@ func Load() *Config {
 	return cfg
 }
 
+// getEnv returns the value of the environment variable named by key, or defaultValue if that variable is not set or is empty.
+// If the environment variable exists but is the empty string, defaultValue is returned.
 func getEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
@@ -67,6 +72,9 @@ func getEnv(key, defaultValue string) string {
 	return value
 }
 
+// getEnvInt retrieves the environment variable named by key and returns its integer value or defaultValue.
+// If the variable is not set, it returns defaultValue. If the variable is set but cannot be parsed as an integer,
+// it logs the parse error and returns defaultValue.
 func getEnvInt(key string, defaultValue int) int {
 	value := os.Getenv(key)
 	if value == "" {

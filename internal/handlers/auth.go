@@ -9,10 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// LoginGet renders the login page using the "login.html" template with HTTP 200 status.
 func LoginGet(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", gin.H{})
 }
 
+// LoginPost handles POST /login form submissions, authenticates the user, creates a session, and redirects to "/" on success.
+// On invalid credentials it renders the login page with HTTP 401 and an error message; if session retrieval or saving fails it aborts with HTTP 500.
 func LoginPost(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
@@ -39,6 +42,8 @@ func LoginPost(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/")
 }
 
+// Logout invalidates the current user session if one exists and redirects the client to the login page.
+// If the session cannot be retrieved, the handler still redirects to "/login".
 func Logout(c *gin.Context) {
 	session, err := middleware.GetStore().Get(c.Request, "session")
 	if err == nil {
