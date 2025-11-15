@@ -16,8 +16,10 @@ func SendUpdateGet(c *gin.Context) {
 
 // SendUpdatePost handles POST requests to submit a newsletter update.
 // It reads "subject" and "body" from the form, calls email.SendUpdate(subject, body),
-// and renders the "send_update.html" template with gin.H{"error": message} when sending fails
-// or gin.H{"success": message} when sending succeeds, returning HTTP 200 in both cases.
+//and renders the "send_update.html" template with gin.H{"error": message} on validation
+// or email failures (returning HTTP 400 or 500 respectively), or gin.H{"success": message}
+// on success (returning HTTP 200)
+
 func SendUpdatePost(c *gin.Context) {
 	subject := c.PostForm("subject")
 	body := c.PostForm("body")
