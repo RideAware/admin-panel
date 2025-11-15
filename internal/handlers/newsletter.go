@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/rideaware/admin-panel/internal/email"
 
@@ -22,7 +23,7 @@ func SendUpdatePost(c *gin.Context) {
 	body := c.PostForm("body")
 
 	// validate inputs
-	if strings.TrimSpace(subject) == "" || strings.TrimSpace(body) == {
+	if strings.TrimSpace(subject) == "" || strings.TrimSpace(body) == "" {
 		c.HTML(http,StatusBadRequest, "send_update.html",
 			gin.H{"error": "Subject and message cannot be empty"})
 		return
