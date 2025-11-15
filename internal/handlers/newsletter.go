@@ -26,7 +26,7 @@ func SendUpdatePost(c *gin.Context) {
 
 	// validate inputs
 	if strings.TrimSpace(subject) == "" || strings.TrimSpace(body) == "" {
-		c.HTML(http,StatusBadRequest, "send_update.html",
+		c.HTML(http.StatusBadRequest, "send_update.html",
 			gin.H{"error": "Subject and message cannot be empty"})
 		return
 	}
