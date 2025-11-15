@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/rideaware/admin-panel/internal/config"
@@ -77,10 +78,8 @@ func send(subject, body, recipient string) bool {
 	unsubLink := fmt.Sprintf("https://%s/unsubscribe?email=%s",
 		cfg.BaseURL, url.QueryEscape(recipient))
 
-	htmlBody := fmt.Sprintf(
-		"%s<br><br>If you ever wish to unsubscribe, "+
-			"please click <a href='%s'>here</a>",
-		body, unsubLink)
+	// Build HTML body with unsubscribe link
+	htmlBody := buildHTMLBody(body, unsubLink)
 	m.SetBodyString(mail.TypeTextHTML, htmlBody)
 
 	if err := client.Send(m); err != nil {
@@ -90,4 +89,26 @@ func send(subject, body, recipient string) bool {
 
 	log.Printf("Update email sent to: %s", recipient)
 	return true
+}
+
+// buildHTMLBody constructs the final HTML email body by appending an unsubscribe footer to the user-provided content.
+// It handles both complete HTML documents and HTML fragments.
+func buildHTMLBody(body, unsubLink string) string {
+	footer := fmt.Sprintf(
+		"<br><br><hr><p style='font-size: 12px; color: #666;'>If you ever wish to unsubscribe, "+
+			"please click <a href='%s'>here</a>.</p>",
+		unsubLink)
+
+	// If body contains closing html tag, insert before it
+	if strings.Contains(strings.ToLower(body), "</html>") {
+		return strings.Replace(body, "</html>", footer+"</html>", 1)
+	}
+
+	// If body contains closing body tag, insert before it
+	if strings.Contains(strings.ToLower(body), "</body>") {
+		return strings.Replace(body, "</body>", footer+"</body>", 1)
+	}
+
+	// Otherwise just append
+	return body + footer
 }
