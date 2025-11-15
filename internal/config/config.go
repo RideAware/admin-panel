@@ -50,8 +50,12 @@ func Load() *Config {
 		SenderEmail:   getEnv("SENDER_EMAIL", ""),
 		AdminUsername: getEnv("ADMIN_USERNAME", "admin"),
 		AdminPassword: getEnv("ADMIN_PASSWORD", "changeme"),
-		SecretKey:     getEnv("SECRET_KEY", "your-secret-key"),
+		SecretKey:     getEnv("SECRET_KEY", ""),
 		BaseURL:       getEnv("BASE_URL", "localhost:5001"),
+	}
+
+	if cfg.SecretKey == "" {
+		log.Fatal("SECRET_KEY environment variable must be set!")
 	}
 
 	if cfg.SenderEmail == "" {
