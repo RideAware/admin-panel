@@ -1,6 +1,8 @@
 package database
 
 import (
+	"context"
+	"time"
 	"database/sql"
 	"fmt"
 	"log"
@@ -27,7 +29,7 @@ type Admin struct {
 // cfg provides PostgreSQL connection parameters and the default admin credentials used to create the
 // default admin user when missing.
 func Init(cfg *config.Config) {
-	password := url.QueryEscape(cfg.PGPassword)
+	password := url.PathEscape(cfg.PGPassword)
 
 	psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=require",
 		cfg.PGUser, password, cfg.PGHost, cfg.PGPort, cfg.PGDatabase,
@@ -45,7 +47,9 @@ func Init(cfg *config.Config) {
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(5)
 
-	if err = db.Ping(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel
+	if err = db.PingContext(ctx); err != nil {
 		log.Fatalf("Failed to ping database: %v", err)
 	}
 
@@ -58,7 +62,9 @@ func Init(cfg *config.Config) {
 // It is safe to call multiple times; if no connection exists, the call is a no-op.
 func Close() {
 	if db != nil {
-		db.Close()
+		if err := db.Close(); err != nil {
+			log.Printf("Error closing database connection: %v", err)
+		}
 	}
 }
 

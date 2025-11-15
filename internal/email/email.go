@@ -3,6 +3,7 @@ package email
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"time"
 
 	"github.com/rideaware/admin-panel/internal/config"
@@ -23,22 +24,24 @@ func SendUpdate(subject, body string) (string, error) {
 	if err != nil {
 		return "Failed to retrieve subscribers", err
 	}
-
 	if len(subscribers) == 0 {
 		return "No subscribers found.", nil
 	}
-
+	var succeeded, failed int
 	for _, email := range subscribers {
-		if !send(subject, body, email) {
-			return fmt.Sprintf("Failed to send to %s", email), nil
+		if send(subject, body, email) {
+			succeeded++
+		} else {
+			failed++
 		}
 	}
-
 	if err := database.LogNewsletter(subject, body); err != nil {
 		log.Printf("Error logging newsletter: %v", err)
 	}
-
-	return "Email has been sent to all subscribers.", nil
+	if failed == 0 {
+		return fmt.Sprintf("Email sent to all %d subscribers.", succeeded), nil
+	}
+	return fmt.Sprintf("Sent to %d/%d subscribers; %d failed.", succeeded, succeeded+failed, failed), nil
 }
 
 // send constructs and sends an HTML newsletter update to the specified recipient using the current SMTP configuration.
@@ -72,7 +75,7 @@ func send(subject, body, recipient string) bool {
 	m.Subject(subject)
 
 	unsubLink := fmt.Sprintf("https://%s/unsubscribe?email=%s",
-		cfg.BaseURL, recipient)
+		cfg.BaseURL, url.QueryEscape(recipient))
 
 	htmlBody := fmt.Sprintf(
 		"%s<br><br>If you ever wish to unsubscribe, "+

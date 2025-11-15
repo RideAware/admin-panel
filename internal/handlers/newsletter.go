@@ -21,9 +21,16 @@ func SendUpdatePost(c *gin.Context) {
 	subject := c.PostForm("subject")
 	body := c.PostForm("body")
 
+	// validate inputs
+	if strings.TrimSpace(subject) == "" || strings.TrimSpace(body) == {
+		c.HTML(http,StatusBadRequest, "send_update.html",
+			gin.H{"error": "Subject and message cannot be empty"})
+		return
+	}
+
 	message, err := email.SendUpdate(subject, body)
 	if err != nil {
-		c.HTML(http.StatusOK, "send_update.html",
+		c.HTML(http.StatusInternalServerError, "send_update.html",
 			gin.H{"error": message})
 		return
 	}

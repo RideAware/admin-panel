@@ -14,7 +14,8 @@ import (
 func IndexGet(c *gin.Context) {
 	emails, err := database.GetAllEmails()
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.HTML(http.StatusInternalServerError, "admin_index.html",
+			gin.H{"error": "Failed to retrieve subscribers"})
 		return
 	}
 	c.HTML(http.StatusOK, "admin_index.html",

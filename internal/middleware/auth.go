@@ -15,6 +15,10 @@ var store *sessions.CookieStore
 // It panics if config.Current.SecretKey is empty.
 // The created store is configured with Path "/", MaxAge one week, HttpOnly true, Secure false, and SameSite 0.
 func Init() {
+	if config.Current == nil {
+		panic("config was not loaded; call config.Load() before middleware.Init()")
+	}
+
 	if config.Current.SecretKey == "" {
 		panic("SECRET_KEY not set")
 	}
@@ -23,8 +27,8 @@ func Init() {
 		Path:     "/",
 		MaxAge:   86400 * 7,
 		HttpOnly: true,
-		Secure:   false,
-		SameSite: 0,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
 	}
 }
 
@@ -40,6 +44,11 @@ func GetStore() *sessions.CookieStore {
 // Otherwise the middleware calls the next handler in the chain.
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if store == nil {
+			c.String(http.StatusInternalServerError, "Session store not initialized.")
+			c.Abort()
+			return
+		}
 		session, err := store.Get(c.Request, "session")
 		if err != nil || session.Values["username"] == nil {
 			c.Redirect(http.StatusFound, "/login")
