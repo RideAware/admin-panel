@@ -48,7 +48,8 @@ func Init(cfg *config.Config) {
 	db.SetMaxIdleConns(5)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel
+	defer cancel()
+
 	if err = db.PingContext(ctx); err != nil {
 		log.Fatalf("Failed to ping database: %v", err)
 	}
