@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel - Subscribers</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        .btn { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .btn-primary { background-color: #4CAF50; color: white; }
+        .btn-logout { background-color: #f44336; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel</h1>
+    <a href="/logout" class="btn btn-logout">Logout</a>
+    <a href="/send_update" class="btn btn-primary">Send Update</a>
+    
+    <h2>Subscribers ({{ len .emails }})</h2>
+    <table>
+        <tr>
+            <th>Email</th>
+        </tr>
+        {{ range .emails }}
+        <tr>
+            <td>{{ . }}</td>
+        </tr>
+        {{ end }}
+    </table>
+</body>
+</html>
