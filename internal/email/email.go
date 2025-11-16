@@ -50,14 +50,23 @@ func SendUpdate(subject, body string) (string, error) {
 func send(subject, body, recipient string) bool {
 	cfg := config.Current
 
-	client, err := mail.NewClient(
-		cfg.SMTPServer,
+	var opts []mail.ClientOption
+	opts = append(opts,
 		mail.WithPort(cfg.SMTPPort),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain),
 		mail.WithUsername(cfg.SMTPUser),
 		mail.WithPassword(cfg.SMTPPassword),
 		mail.WithTimeout(10*time.Second),
 	)
+
+	// Use SSL for port 465, STARTTLS for others
+	if cfg.SMTPPort == 465 {
+		opts = append(opts, mail.WithSSL())
+	} else {
+		opts = append(opts, mail.WithTLSPolicy(mail.TLSMandatory))
+	}
+
+	client, err := mail.NewClient(cfg.SMTPServer, opts...)
 	if err != nil {
 		log.Printf("Failed to create mail client: %v", err)
 		return false
