@@ -59,7 +59,7 @@ func send(subject, body, recipient string) bool {
 	// Create TLS connection
 	tlsconfig := &tls.Config{
 		ServerName: cfg.SMTPServer,
-		MinVersion: tls.VersionTLS12
+		MinVersion: tls.VersionTLS12,
 	}
 
 	conn, err := tls.Dial("tcp", addr, tlsconfig)
